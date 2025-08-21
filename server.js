@@ -29,7 +29,7 @@ mongoose.connect(MONGODB_URI)
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:8080',
+  origin: ['http://localhost:8080', 'http://localhost:3000', 'https://appmywebsite.netlify.app'],
   credentials: true
 }));
 app.use(express.json());

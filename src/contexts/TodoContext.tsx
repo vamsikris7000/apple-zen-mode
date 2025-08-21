@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { API_BASE_URL } from '../config/api';
 
 interface Todo {
   _id: string;
@@ -64,7 +65,7 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
   
   const { token, user } = useAuth();
 
-  const API_BASE = 'http://localhost:3001/api';
+  const API_BASE = API_BASE_URL;
 
   const makeRequest = async (endpoint: string, options: RequestInit = {}) => {
     if (!token) {
@@ -72,13 +73,20 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
-        ...options,
+      const response = await fetch(API_BASE, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          ...options.headers,
         },
+        body: JSON.stringify({
+          path: `${endpoint}`,
+          method: options.method || 'GET',
+          body: options.body ? JSON.parse(options.body as string) : undefined,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            ...options.headers,
+          },
+        }),
       });
 
       if (!response.ok) {

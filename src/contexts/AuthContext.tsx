@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { API_BASE_URL } from '../config/api';
 
 interface User {
   email: string;
@@ -44,11 +45,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const verifyToken = async (tokenToVerify: string) => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/verify', {
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${tokenToVerify}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          path: '/api/auth/verify',
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${tokenToVerify}`,
+          },
+        }),
       });
 
       if (response.ok) {
@@ -73,12 +81,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
+      const response = await fetch(API_BASE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          path: '/api/auth/login',
+          method: 'POST',
+          body: { email, password },
+        }),
       });
 
       const data = await response.json();
