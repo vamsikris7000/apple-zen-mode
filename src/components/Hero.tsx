@@ -21,11 +21,8 @@ export const Hero = () => {
           {/* Tagline */}
           <div className="space-y-3 sm:space-y-4">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-light text-foreground tracking-tight leading-tight">
-              Welcome to Apple Zen Mode
+              My Website
             </h1>
-            <p className="text-sm sm:text-base lg:text-lg text-muted-foreground font-light leading-relaxed px-2">
-              Secure authentication with Apple-inspired design
-            </p>
           </div>
           
           {/* Buttons */}
@@ -36,12 +33,6 @@ export const Hero = () => {
               className="w-full rounded-xl px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-medium transition-all duration-300 hover:scale-[1.02]"
             >
               Sign In
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full rounded-xl px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-medium transition-all duration-300 hover:scale-[1.02]"
-            >
-              Learn More
             </Button>
           </div>
         </div>

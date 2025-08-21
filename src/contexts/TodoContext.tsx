@@ -62,7 +62,7 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   const API_BASE = 'http://localhost:3001/api';
 
@@ -71,21 +71,82 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
       throw new Error('No authentication token');
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      },
-    });
+    try {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      // Fallback to localStorage if MongoDB is not available
+      console.warn('MongoDB not available, using localStorage fallback:', error);
+      return handleLocalStorageRequest(endpoint, options);
     }
+  };
 
-    return response.json();
+  const handleLocalStorageRequest = async (endpoint: string, options: RequestInit = {}) => {
+    const storageKey = `todos_${user?.email || 'default'}`;
+    
+    switch (endpoint) {
+      case '/todos':
+        if (options.method === 'GET') {
+          const stored = localStorage.getItem(storageKey);
+          return stored ? JSON.parse(stored) : [];
+        } else if (options.method === 'POST') {
+          const newTodo = JSON.parse(options.body as string);
+          const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          const todoWithId = { ...newTodo, _id: Date.now().toString(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+          stored.unshift(todoWithId);
+          localStorage.setItem(storageKey, JSON.stringify(stored));
+          return todoWithId;
+        } else if (options.method === 'PUT') {
+          const updates = JSON.parse(options.body as string);
+          const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          const updated = stored.map((todo: any) => 
+            todo._id === updates._id ? { ...todo, ...updates, updatedAt: new Date().toISOString() } : todo
+          );
+          localStorage.setItem(storageKey, JSON.stringify(updated));
+          return updated.find((todo: any) => todo._id === updates._id);
+        } else if (options.method === 'DELETE') {
+          const id = endpoint.split('/').pop();
+          const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          const filtered = stored.filter((todo: any) => todo._id !== id);
+          localStorage.setItem(storageKey, JSON.stringify(filtered));
+          return { message: 'Todo deleted successfully' };
+        } else if (options.method === 'PATCH' && endpoint.includes('/toggle')) {
+          const id = endpoint.split('/')[2];
+          const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          const updated = stored.map((todo: any) => 
+            todo._id === id ? { ...todo, completed: !todo.completed, updatedAt: new Date().toISOString() } : todo
+          );
+          localStorage.setItem(storageKey, JSON.stringify(updated));
+          return updated.find((todo: any) => todo._id === id);
+        }
+        break;
+      case '/todos/stats':
+        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const total = stored.length;
+        const completed = stored.filter((todo: any) => todo.completed).length;
+        const pending = total - completed;
+        const highPriority = stored.filter((todo: any) => todo.priority === 'high').length;
+        const overdue = stored.filter((todo: any) => {
+          if (!todo.dueDate || todo.completed) return false;
+          return new Date(todo.dueDate) < new Date();
+        }).length;
+        return { total, completed, pending, highPriority, overdue };
+    }
+    
+    throw new Error('Endpoint not supported in localStorage fallback');
   };
 
   const fetchTodos = async () => {

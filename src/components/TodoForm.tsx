@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { X, Save, Calendar, Tag } from "lucide-react";
+import { X, Save, Calendar } from "lucide-react";
 
 interface TodoFormProps {
   onClose: () => void;
@@ -19,9 +19,7 @@ export const TodoForm = ({ onClose, todo }: TodoFormProps) => {
     title: todo?.title || "",
     description: todo?.description || "",
     priority: todo?.priority || "medium",
-    dueDate: todo?.dueDate ? new Date(todo.dueDate).toISOString().split('T')[0] : "",
-    category: todo?.category || "general",
-    tags: todo?.tags?.join(", ") || ""
+    dueDate: todo?.dueDate ? new Date(todo.dueDate).toISOString().split('T')[0] : ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,8 +31,7 @@ export const TodoForm = ({ onClose, todo }: TodoFormProps) => {
 
     try {
       const todoData = {
-        ...formData,
-        tags: formData.tags.split(",").map(tag => tag.trim()).filter(tag => tag.length > 0)
+        ...formData
       };
 
       if (todo) {
@@ -121,37 +118,7 @@ export const TodoForm = ({ onClose, todo }: TodoFormProps) => {
         </div>
       </div>
 
-      {/* Category and Tags */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="category" className="text-sm font-medium text-foreground">
-            Category
-          </Label>
-          <Input
-            id="category"
-            value={formData.category}
-            onChange={(e) => handleChange("category", e.target.value)}
-            placeholder="e.g., Work, Personal"
-            className="h-10 rounded-lg border-border/50 bg-background/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-          />
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="tags" className="text-sm font-medium text-foreground">
-            Tags
-          </Label>
-          <div className="relative">
-            <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              id="tags"
-              value={formData.tags}
-              onChange={(e) => handleChange("tags", e.target.value)}
-              placeholder="tag1, tag2, tag3"
-              className="pl-10 h-10 rounded-lg border-border/50 bg-background/50 backdrop-blur-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200"
-            />
-          </div>
-        </div>
-      </div>
 
       {/* Error Message */}
       {error && (
