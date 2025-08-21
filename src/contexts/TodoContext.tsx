@@ -73,20 +73,13 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
     }
 
     try {
-      const response = await fetch(API_BASE, {
-        method: 'POST',
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...options.headers,
         },
-        body: JSON.stringify({
-          path: `${endpoint}`,
-          method: options.method || 'GET',
-          body: options.body ? JSON.parse(options.body as string) : undefined,
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            ...options.headers,
-          },
-        }),
       });
 
       if (!response.ok) {

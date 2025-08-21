@@ -2,8 +2,9 @@
 const getApiBaseUrl = () => {
   // Check if we're in production (Netlify)
   if (window.location.hostname === 'appmywebsite.netlify.app') {
-    // Use Netlify function as proxy
-    return '/.netlify/functions/api';
+    // For now, use localhost even in production (you'll need to deploy backend separately)
+    // This is a temporary solution until you deploy your backend
+    return 'http://localhost:3001/api';
   }
   
   // Development - use localhost

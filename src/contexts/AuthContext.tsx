@@ -45,18 +45,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const verifyToken = async (tokenToVerify: string) => {
     try {
-      const response = await fetch(API_BASE_URL, {
-        method: 'POST',
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         headers: {
+          'Authorization': `Bearer ${tokenToVerify}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          path: '/api/auth/verify',
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${tokenToVerify}`,
-          },
-        }),
       });
 
       if (response.ok) {
@@ -81,16 +74,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
-      const response = await fetch(API_BASE_URL, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          path: '/api/auth/login',
-          method: 'POST',
-          body: { email, password },
-        }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
