@@ -69,10 +69,12 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
 
   const makeRequest = async (endpoint: string, options: RequestInit = {}) => {
     if (!token) {
+      console.error('No authentication token available');
       throw new Error('No authentication token');
     }
 
     try {
+      console.log('Making request to:', endpoint, 'with token:', token.substring(0, 20) + '...');
       const response = await fetch(`${API_BASE}${endpoint}`, {
         ...options,
         headers: {
@@ -82,8 +84,10 @@ export const TodoProvider: React.FC<TodoProviderProps> = ({ children }) => {
         },
       });
 
+      console.log('Response status:', response.status);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('Request failed:', response.status, errorData);
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
